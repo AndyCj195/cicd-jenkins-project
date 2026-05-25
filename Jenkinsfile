@@ -2,6 +2,11 @@ pipeline {
     // Definimos que el pipeline se puede ejecutar en cualquier agente disponible que cumpla los requisitos
     agent any
 
+    tools {
+        // Indica a Jenkins que autoinstale y cargue en el PATH la versión de Node.js configurada como 'NodeJS 20'
+        nodejs 'NodeJS 20'
+    }
+
     environment {
         // Variable para definir el nombre de nuestra imagen de Docker
         IMAGE_NAME = 'cicd-jenkins-app'
