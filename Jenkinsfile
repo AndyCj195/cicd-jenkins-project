@@ -74,22 +74,30 @@ pipeline {
     // Acciones de cierre del pipeline para manejar notificaciones
     post {
         success {
-            echo 'Enviando notificación de éxito a Slack...'
-            // Envía un mensaje con borde verde al canal preconfigurado de Slack
-            // Nota: Requiere la instalación del plugin "Slack Notification" en Jenkins
-            // y la previa configuración del Integration Token en la sección de credenciales globales.
-            slackSend(
-                color: '#36a64f',
-                message: "✅ ¡ÉXITO en el Pipeline de CI/CD!\nProyecto: *${env.JOB_NAME}*\nCompilación: *#${env.BUILD_NUMBER}*\nDetalles en: ${env.BUILD_URL}"
-            )
+            script {
+                try {
+                    echo 'Enviando notificación de éxito a Slack...'
+                    slackSend(
+                        color: '#36a64f',
+                        message: "✅ ¡ÉXITO en el Pipeline de CI/CD!\nProyecto: *${env.JOB_NAME}*\nCompilación: *#${env.BUILD_NUMBER}*\nDetalles en: ${env.BUILD_URL}"
+                    )
+                } catch (Exception e) {
+                    echo "ADVERTENCIA: No se pudo enviar la notificación a Slack (¿faltan credenciales?). Detalle: ${e.getMessage()}"
+                }
+            }
         }
         failure {
-            echo 'Enviando notificación de fallo a Slack...'
-            // Envía un mensaje con borde rojo al canal de Slack para alertar al equipo de desarrollo
-            slackSend(
-                color: '#FF0000',
-                message: "❌ ¡FALLO en el Pipeline de CI/CD!\nProyecto: *${env.JOB_NAME}*\nCompilación: *#${env.BUILD_NUMBER}*\nDetalles en: ${env.BUILD_URL}"
-            )
+            script {
+                try {
+                    echo 'Enviando notificación de fallo a Slack...'
+                    slackSend(
+                        color: '#FF0000',
+                        message: "❌ ¡FALLO en el Pipeline de CI/CD!\nProyecto: *${env.JOB_NAME}*\nCompilación: *#${env.BUILD_NUMBER}*\nDetalles en: ${env.BUILD_URL}"
+                    )
+                } catch (Exception e) {
+                    echo "ADVERTENCIA: No se pudo enviar la notificación a Slack (¿faltan credenciales?). Detalle: ${e.getMessage()}"
+                }
+            }
         }
     }
 }
