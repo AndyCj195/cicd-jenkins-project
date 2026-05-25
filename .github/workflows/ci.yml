@@ -1,0 +1,41 @@
+# Nombre del Pipeline de Integración Continua en GitHub Actions
+name: Node.js CI
+
+# Eventos que desencadenan la ejecución del pipeline
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+# Definición de los trabajos (jobs) a realizar
+jobs:
+  build-and-test:
+    # Se ejecutará en la última versión estable del runner de Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    # Paso 1: Clonar el código fuente del repositorio usando la acción oficial
+    - name: Checkout del repositorio
+      uses: actions/checkout@v4
+
+    # Paso 2: Configurar el entorno de ejecución de Node.js v20
+    - name: Configurar Node.js (Versión 20)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        # Habilita el almacenamiento en caché de dependencias de npm para acelerar ejecuciones futuras
+        cache: 'npm'
+
+    # Paso 3: Instalar dependencias limpiamente
+    - name: Instalar dependencias
+      run: npm ci
+
+    # Paso 4: Ejecutar las pruebas unitarias creadas con Jest
+    - name: Ejecutar Pruebas Unitarias
+      run: npm test
+
+    # Paso 5: Construir la imagen Docker para asegurar que el Dockerfile funciona correctamente
+    - name: Construir Imagen Docker (Verificación de Build)
+      run: |
+        docker build -t cicd-jenkins-app:github-actions-${{ github.run_number }} .

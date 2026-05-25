@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Servicio principal de la aplicación Node.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Especificamos la etapa final de producción definida en el Dockerfile
+      target: production
+    container_name: cicd-jenkins-app
+    # Reiniciar el contenedor automáticamente si se detiene, a menos que se detenga manualmente
+    restart: always
+    ports:
+      # Mapear el puerto 3000 del contenedor al puerto 3000 del host
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+    # Configuración de Healthcheck solicitada para monitorear el estado de salud de la aplicación
+    healthcheck:
+      # Dado que la imagen base es node:20-alpine y no incluye curl,
+      # se utiliza wget para realizar la petición al endpoint de salud interno.
+      # --spider verifica si la URL responde sin descargar el contenido.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      # Intervalo entre verificaciones
+      interval: 30s
+      # Tiempo máximo permitido para que la petición responda
+      timeout: 5s
+      # Número de fallos consecutivos antes de marcar el contenedor como 'unhealthy'
+      retries: 3
+      # Tiempo de gracia inicial para permitir que el servidor Express arranque antes de comenzar a monitorear
+      start_period: 10s
